@@ -1,65 +1,66 @@
--- Invisibility Debug Mode 🕵️‍♂️
+-- Invisibility Trick v2 (Safe Clone Mode 🧪)
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
 local camera = workspace.CurrentCamera
 
--- Step 1: Sanity checks
-if not character then
-    warn("[Invisibility] Character is nil.")
-    return
+-- Wait until the character fully loads and has a Humanoid + RootPart
+local function waitForCharacter()
+    local char = player.Character or player.CharacterAdded:Wait()
+    local humanoid = char:WaitForChild("Humanoid", 10)
+    local root = char:WaitForChild("HumanoidRootPart", 10)
+
+    if humanoid and root then
+        return char
+    else
+        warn("[Invisibility] Character failed to fully load.")
+        return nil
+    end
 end
 
-print("[Invisibility] Character found:", character)
+-- Main invisibility toggle
+local character = waitForCharacter()
+if not character then return end
 
-local rootPart = character:FindFirstChild("HumanoidRootPart")
-if not rootPart then
-    warn("[Invisibility] No HumanoidRootPart found.")
-    return
-end
-
--- Step 2: Toggle
+-- Already invisible?
 if _G.InvisActive then
     if _G.FakeDummy and _G.FakeDummy:IsDescendantOf(workspace) then
-        print("[Invisibility] Toggling OFF")
         character:MoveTo(_G.FakeDummy.Position)
         camera.CameraSubject = character:FindFirstChild("Humanoid") or character
         _G.FakeDummy:Destroy()
     end
     _G.InvisActive = false
+    print("[Invisibility] Back in sight 👁️")
     return
 end
 
--- Step 3: Clone character
+-- Activate invisibility
 _G.InvisActive = true
-local fakeChar = character:Clone()
 
+-- Clone the character
+local fakeChar = character:Clone()
 if not fakeChar then
-    warn("[Invisibility] Character cloning failed!")
+    warn("[Invisibility] Failed to clone character.")
     return
 end
 
-print("[Invisibility] Character cloned:", fakeChar)
-
--- Step 4: Assign name
 fakeChar.Name = "FakeDummy"
 fakeChar.Parent = workspace
 
--- Step 5: Cleanup and visuals
+-- Cleanup
 for _, part in ipairs(fakeChar:GetDescendants()) do
     if part:IsA("Script") or part:IsA("LocalScript") then
         part:Destroy()
-    end
-    if part:IsA("BasePart") or part:IsA("Decal") then
+    elseif part:IsA("BasePart") or part:IsA("Decal") then
         part.Transparency = 0.5
     end
 end
 
--- Step 6: Teleport real player
+-- Move player far away
 character:SetPrimaryPartCFrame(CFrame.new(99999, 99999, 99999))
 
--- Step 7: Camera switcheroo
+-- Camera follows the dummy
 camera.CameraSubject = fakeChar:FindFirstChild("Humanoid") or fakeChar:FindFirstChildWhichIsA("BasePart")
-_G.FakeDummy = fakeChar
 
-print("[Invisibility] You have vanished into the abyss 👻")
+_G.FakeDummy = fakeChar
+print("[Invisibility] Now you see me... not! 👻")
+
