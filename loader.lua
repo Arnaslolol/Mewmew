@@ -1,14 +1,12 @@
--- Base URL of your GitHub repo raw file path
+-- Made by a mysterious troll dev 😈
 local baseURL = "https://raw.githubusercontent.com/Arnaslolol/Mewmew/main/"
 
--- List all the script filenames you want to load
 local scriptList = {
-    "script1.lua",
-    "script2.lua",
-    "script3.lua"
+    "UIManager.lua",
+    "AnnoyScript.lua",
+    "FakeError.lua"
 }
 
--- Loop through and load+run each script
 for _, fileName in ipairs(scriptList) do
     local scriptURL = baseURL .. fileName
     local success, err = pcall(function()
