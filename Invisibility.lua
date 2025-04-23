@@ -5,10 +5,15 @@ local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local camera = workspace.CurrentCamera
 
+-- Sanity check
+if not character or not character:FindFirstChild("HumanoidRootPart") then
+    warn("[Invisibility] Character not fully loaded.")
+    return
+end
+
 -- Toggle check
 if _G.InvisActive then
-    -- Turn OFF
-    if _G.FakeDummy then
+    if _G.FakeDummy and _G.FakeDummy:IsDescendantOf(workspace) then
         character:MoveTo(_G.FakeDummy.Position)
         camera.CameraSubject = character:FindFirstChild("Humanoid") or character
         _G.FakeDummy:Destroy()
@@ -26,7 +31,15 @@ local rootPart = character:WaitForChild("HumanoidRootPart")
 local originalPos = rootPart.Position
 
 -- Clone the character as a dummy (visually only)
-local fakeChar = character:Clone()
+local success, fakeChar = pcall(function()
+    return character:Clone()
+end)
+
+if not success or not fakeChar then
+    warn("[Invisibility] Failed to clone character.")
+    return
+end
+
 fakeChar.Name = "FakeDummy"
 fakeChar.Parent = workspace
 
